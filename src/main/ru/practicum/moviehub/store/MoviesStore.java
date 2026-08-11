@@ -11,16 +11,16 @@ public class MoviesStore {
     private final Map<Integer, Movie> movies = new HashMap<>();
     private int currentId = 1;
 
-    public void setCurrentId(int currentId) {
-        this.currentId = currentId;
-    }
-
     public Map<Integer, Movie> getMovies() {
         return movies;
     }
 
     public int getCurrentId() {
         return currentId;
+    }
+
+    public void setCurrentId(int currentId) {
+        this.currentId = currentId;
     }
 
     public Movie addMovie(Movie movie) {
