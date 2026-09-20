@@ -240,375 +240,202 @@ public class MoviesApiTest {
     @Test
     void getMovies_whenMoviesExist_returnsMovies() throws Exception {
         String requestBody = """
-        {
-          "title": "Матрица",
-          "year": 1999
-        }
-        """;
+                {
+                  "title": "Матрица",
+                  "year": 1999
+                }
+                """;
 
-        HttpResponse<String> createResponse =
-                sendPostRequest(requestBody);
+        HttpResponse<String> createResponse = sendPostRequest(requestBody);
 
-        int movieId = assertCreatedMovie(
-                createResponse,
-                "Матрица",
-                1999
-        );
+        int movieId = assertCreatedMovie(createResponse, "Матрица", 1999);
 
-        HttpResponse<String> getResponse =
-                sendGetRequest("/movies");
+        HttpResponse<String> getResponse = sendGetRequest("/movies");
 
-        assertEquals(
-                200,
-                getResponse.statusCode(),
-                "GET /movies должен вернуть 200"
-        );
+        assertEquals(200, getResponse.statusCode(), "GET /movies должен вернуть 200");
 
         assertJsonContentType(getResponse);
 
-        JsonArray movies = JsonParser
-                .parseString(getResponse.body())
-                .getAsJsonArray();
+        JsonArray movies = JsonParser.parseString(getResponse.body()).getAsJsonArray();
 
-        assertEquals(
-                1,
-                movies.size(),
-                "В списке должен находиться один фильм"
-        );
+        assertEquals(1, movies.size(), "В списке должен находиться один фильм");
 
-        JsonObject movieJson = movies
-                .get(0)
-                .getAsJsonObject();
+        JsonObject movieJson = movies.get(0).getAsJsonObject();
 
-        assertEquals(
-                movieId,
-                movieJson.get("id").getAsInt(),
-                "ID фильма должен совпадать"
-        );
+        assertEquals(movieId, movieJson.get("id").getAsInt(), "ID фильма должен совпадать");
 
-        assertEquals(
-                "Матрица",
-                movieJson.get("title").getAsString(),
-                "Название фильма должно совпадать"
-        );
+        assertEquals("Матрица", movieJson.get("title").getAsString(), "Название фильма должно совпадать");
 
-        assertEquals(
-                1999,
-                movieJson.get("year").getAsInt(),
-                "Год фильма должен совпадать"
-        );
+        assertEquals(1999, movieJson.get("year").getAsInt(), "Год фильма должен совпадать");
     }
 
     @Test
     void deleteMovie_whenMovieExists_returnsNoContent() throws Exception {
         String requestBody = """
-        {
-          "title": "Матрица",
-          "year": 1999
-        }
-        """;
+                {
+                  "title": "Матрица",
+                  "year": 1999
+                }
+                """;
 
-        HttpResponse<String> createResponse =
-                sendPostRequest(requestBody);
+        HttpResponse<String> createResponse = sendPostRequest(requestBody);
 
-        int movieId = assertCreatedMovie(
-                createResponse,
-                "Матрица",
-                1999
-        );
+        int movieId = assertCreatedMovie(createResponse, "Матрица", 1999);
 
-        HttpResponse<String> deleteResponse =
-                sendDeleteRequest("/movies/" + movieId);
+        HttpResponse<String> deleteResponse = sendDeleteRequest("/movies/" + movieId);
 
-        assertEquals(
-                204,
-                deleteResponse.statusCode(),
-                "DELETE /movies/{id} существующего фильма должен вернуть 204"
-        );
+        assertEquals(204, deleteResponse.statusCode(), "DELETE /movies/{id} существующего фильма должен вернуть 204");
 
-        assertEquals(
-                "",
-                deleteResponse.body(),
-                "Ответ 204 No Content не должен содержать тело"
-        );
+        assertEquals("", deleteResponse.body(), "Ответ 204 No Content не должен содержать тело");
 
-        HttpResponse<String> getResponse =
-                sendGetRequest("/movies/" + movieId);
+        HttpResponse<String> getResponse = sendGetRequest("/movies/" + movieId);
 
-        assertEquals(
-                404,
-                getResponse.statusCode(),
-                "После удаления фильм не должен находиться в хранилище"
-        );
+        assertEquals(404, getResponse.statusCode(), "После удаления фильм не должен находиться в хранилище");
     }
 
     @Test
     void deleteMovie_whenMovieNotFound_returnsNotFound() throws Exception {
-        HttpResponse<String> response =
-                sendDeleteRequest("/movies/999");
+        HttpResponse<String> response = sendDeleteRequest("/movies/999");
 
-        assertEquals(
-                404,
-                response.statusCode(),
-                "DELETE /movies/{id} для несуществующего фильма должен вернуть 404"
-        );
+        assertEquals(404, response.statusCode(), "DELETE /movies/{id} для несуществующего фильма должен вернуть 404");
 
         assertJsonContentType(response);
 
-        JsonObject responseJson = JsonParser
-                .parseString(response.body())
-                .getAsJsonObject();
+        JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
 
-        assertTrue(
-                responseJson.has("error"),
-                "Ответ должен содержать поле error"
-        );
+        assertTrue(responseJson.has("error"), "Ответ должен содержать поле error");
 
-        assertEquals(
-                "Фильм не найден",
-                responseJson.get("error").getAsString(),
-                "Сообщение об ошибке должно совпадать"
-        );
+        assertEquals("Фильм не найден", responseJson.get("error").getAsString(), "Сообщение об ошибке должно совпадать");
     }
 
     @Test
     void deleteMovie_whenIdNotNumber_returnsBadRequest() throws Exception {
-        HttpResponse<String> response =
-                sendDeleteRequest("/movies/abc");
+        HttpResponse<String> response = sendDeleteRequest("/movies/abc");
 
-        assertEquals(
-                400,
-                response.statusCode(),
-                "DELETE /movies/{id} с нечисловым ID должен вернуть 400"
-        );
+        assertEquals(400, response.statusCode(), "DELETE /movies/{id} с нечисловым ID должен вернуть 400");
 
         assertJsonContentType(response);
 
-        JsonObject responseJson = JsonParser
-                .parseString(response.body())
-                .getAsJsonObject();
+        JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
 
-        assertTrue(
-                responseJson.has("error"),
-                "Ответ должен содержать поле error"
-        );
+        assertTrue(responseJson.has("error"), "Ответ должен содержать поле error");
 
-        assertEquals(
-                "Некорректный ID",
-                responseJson.get("error").getAsString(),
-                "Сообщение об ошибке должно совпадать"
-        );
+        assertEquals("Некорректный ID", responseJson.get("error").getAsString(), "Сообщение об ошибке должно совпадать");
     }
 
     @Test
     void getMoviesByYear_whenMoviesExist_returnsMatchingMovies() throws Exception {
         String matrixJson = """
-        {
-          "title": "Матрица",
-          "year": 1999
-        }
-        """;
+                {
+                  "title": "Матрица",
+                  "year": 1999
+                }
+                """;
 
         String inceptionJson = """
-        {
-          "title": "Начало",
-          "year": 2010
-        }
-        """;
+                {
+                  "title": "Начало",
+                  "year": 2010
+                }
+                """;
 
         sendPostRequest(matrixJson);
         sendPostRequest(inceptionJson);
 
-        HttpResponse<String> response =
-                sendGetRequest("/movies?year=1999");
+        HttpResponse<String> response = sendGetRequest("/movies?year=1999");
 
-        assertEquals(
-                200,
-                response.statusCode(),
-                "GET /movies?year=YYYY должен вернуть 200"
-        );
+        assertEquals(200, response.statusCode(), "GET /movies?year=YYYY должен вернуть 200");
 
         assertJsonContentType(response);
 
-        JsonArray movies = JsonParser
-                .parseString(response.body())
-                .getAsJsonArray();
+        JsonArray movies = JsonParser.parseString(response.body()).getAsJsonArray();
 
-        assertEquals(
-                1,
-                movies.size(),
-                "Должен вернуться только один фильм указанного года"
-        );
+        assertEquals(1, movies.size(), "Должен вернуться только один фильм указанного года");
 
-        JsonObject movieJson = movies
-                .get(0)
-                .getAsJsonObject();
+        JsonObject movieJson = movies.get(0).getAsJsonObject();
 
-        assertEquals(
-                "Матрица",
-                movieJson.get("title").getAsString(),
-                "Должен вернуться фильм указанного года"
-        );
+        assertEquals("Матрица", movieJson.get("title").getAsString(), "Должен вернуться фильм указанного года");
 
-        assertEquals(
-                1999,
-                movieJson.get("year").getAsInt(),
-                "Год фильма должен совпадать с параметром запроса"
-        );
+        assertEquals(1999, movieJson.get("year").getAsInt(), "Год фильма должен совпадать с параметром запроса");
     }
 
     @Test
     void getMoviesByYear_whenNoMoviesFound_returnsEmptyArray() throws Exception {
         String requestBody = """
-        {
-          "title": "Матрица",
-          "year": 1999
-        }
-        """;
+                {
+                  "title": "Матрица",
+                  "year": 1999
+                }
+                """;
 
         sendPostRequest(requestBody);
 
-        HttpResponse<String> response =
-                sendGetRequest("/movies?year=2010");
+        HttpResponse<String> response = sendGetRequest("/movies?year=2010");
 
-        assertEquals(
-                200,
-                response.statusCode(),
-                "GET /movies?year=YYYY должен вернуть 200"
-        );
+        assertEquals(200, response.statusCode(), "GET /movies?year=YYYY должен вернуть 200");
 
         assertJsonContentType(response);
 
-        JsonArray movies = JsonParser
-                .parseString(response.body())
-                .getAsJsonArray();
+        JsonArray movies = JsonParser.parseString(response.body()).getAsJsonArray();
 
-        assertEquals(
-                0,
-                movies.size(),
-                "Если фильмов указанного года нет, должен вернуться пустой массив"
-        );
+        assertEquals(0, movies.size(), "Если фильмов указанного года нет, должен вернуться пустой массив");
     }
 
     @Test
     void getMoviesByYear_whenYearNotNumber_returnsBadRequest() throws Exception {
-        HttpResponse<String> response =
-                sendGetRequest("/movies?year=abc");
+        HttpResponse<String> response = sendGetRequest("/movies?year=abc");
 
-        assertEquals(
-                400,
-                response.statusCode(),
-                "GET /movies с нечисловым параметром year должен вернуть 400"
-        );
+        assertEquals(400, response.statusCode(), "GET /movies с нечисловым параметром year должен вернуть 400");
 
         assertJsonContentType(response);
 
-        JsonObject responseJson = JsonParser
-                .parseString(response.body())
-                .getAsJsonObject();
+        JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
 
-        assertTrue(
-                responseJson.has("error"),
-                "Ответ должен содержать поле error"
-        );
+        assertTrue(responseJson.has("error"), "Ответ должен содержать поле error");
 
-        assertEquals(
-                "Некорректный параметр запроса — 'year'",
-                responseJson.get("error").getAsString(),
-                "Сообщение об ошибке должно совпадать"
-        );
+        assertEquals("Некорректный параметр запроса — 'year'", responseJson.get("error").getAsString(), "Сообщение об ошибке должно совпадать");
     }
 
     @Test
     void getMovies_whenQueryParameterInvalid_returnsBadRequest() throws Exception {
-        HttpResponse<String> response =
-                sendGetRequest("/movies?foo=1999");
+        HttpResponse<String> response = sendGetRequest("/movies?foo=1999");
 
-        assertEquals(
-                400,
-                response.statusCode(),
-                "GET /movies с неподдерживаемым параметром должен вернуть 400"
-        );
+        assertEquals(400, response.statusCode(), "GET /movies с неподдерживаемым параметром должен вернуть 400");
 
         assertJsonContentType(response);
 
-        JsonObject responseJson = JsonParser
-                .parseString(response.body())
-                .getAsJsonObject();
+        JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
 
-        assertTrue(
-                responseJson.has("error"),
-                "Ответ должен содержать поле error"
-        );
+        assertTrue(responseJson.has("error"), "Ответ должен содержать поле error");
 
-        assertEquals(
-                "Некорректный параметр запроса — 'year'",
-                responseJson.get("error").getAsString(),
-                "Сообщение должно указывать на корректный параметр year"
-        );
+        assertEquals("Некорректный параметр запроса — 'year'", responseJson.get("error").getAsString(), "Сообщение должно указывать на корректный параметр year");
     }
 
     @Test
     void movies_whenMethodUnsupported_returnsMethodNotAllowed() throws Exception {
-        HttpResponse<String> response =
-                sendPutRequest("/movies");
+        HttpResponse<String> response = sendPutRequest("/movies");
 
-        assertEquals(
-                405,
-                response.statusCode(),
-                "Неподдерживаемый HTTP-метод должен вернуть 405"
-        );
+        assertEquals(405, response.statusCode(), "Неподдерживаемый HTTP-метод должен вернуть 405");
 
         assertJsonContentType(response);
 
-        JsonObject responseJson = JsonParser
-                .parseString(response.body())
-                .getAsJsonObject();
+        JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
 
-        assertTrue(
-                responseJson.has("error"),
-                "Ответ должен содержать поле error"
-        );
+        assertTrue(responseJson.has("error"), "Ответ должен содержать поле error");
 
-        assertEquals(
-                "Метод не поддерживается",
-                responseJson.get("error").getAsString(),
-                "Сообщение об ошибке должно совпадать"
-        );
+        assertEquals("Метод не поддерживается", responseJson.get("error").getAsString(), "Сообщение об ошибке должно совпадать");
     }
 
-    private HttpResponse<String> sendPutRequest(
-            String path
-    ) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE + path))
-                .timeout(Duration.ofSeconds(2))
-                .PUT(HttpRequest.BodyPublishers.noBody())
-                .build();
+    private HttpResponse<String> sendPutRequest(String path) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE + path)).timeout(Duration.ofSeconds(2)).PUT(HttpRequest.BodyPublishers.noBody()).build();
 
-        return client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString(
-                        StandardCharsets.UTF_8
-                )
-        );
+        return client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
     }
 
-    private HttpResponse<String> sendDeleteRequest(
-            String path
-    ) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE + path))
-                .timeout(Duration.ofSeconds(2))
-                .DELETE()
-                .build();
+    private HttpResponse<String> sendDeleteRequest(String path) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE + path)).timeout(Duration.ofSeconds(2)).DELETE().build();
 
-        return client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString(
-                        StandardCharsets.UTF_8
-                )
-        );
+        return client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
     }
 
 

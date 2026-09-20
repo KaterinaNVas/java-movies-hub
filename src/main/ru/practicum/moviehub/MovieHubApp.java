@@ -6,9 +6,7 @@ public class MovieHubApp {
     public static void main(String[] args) {
         MoviesServer server = new MoviesServer();
 
-        Runtime.getRuntime().addShutdownHook(
-                new Thread(server::stop)
-        );
+        Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
 
         server.start();
     }
