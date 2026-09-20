@@ -126,7 +126,22 @@ public class MoviesHandler extends BaseHttpHandler {
         String yearPart =
                 query.substring("year=".length());
 
-        int year = Integer.parseInt(yearPart);
+        int year;
+
+        try {
+            year = Integer.parseInt(yearPart);
+        } catch (NumberFormatException e) {
+            ErrorResponse errorResponse = new ErrorResponse(
+                    "Некорректный параметр запроса — 'year'"
+            );
+
+            sendJson(
+                    ex,
+                    400,
+                    gson.toJson(errorResponse)
+            );
+            return;
+        }
 
         List<Movie> movies =
                 store.getMoviesByYear(year);

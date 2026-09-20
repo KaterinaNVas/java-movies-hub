@@ -490,6 +490,35 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void getMoviesByYear_whenYearNotNumber_returnsBadRequest() throws Exception {
+        HttpResponse<String> response =
+                sendGetRequest("/movies?year=abc");
+
+        assertEquals(
+                400,
+                response.statusCode(),
+                "GET /movies с нечисловым параметром year должен вернуть 400"
+        );
+
+        assertJsonContentType(response);
+
+        JsonObject responseJson = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
+
+        assertTrue(
+                responseJson.has("error"),
+                "Ответ должен содержать поле error"
+        );
+
+        assertEquals(
+                "Некорректный параметр запроса — 'year'",
+                responseJson.get("error").getAsString(),
+                "Сообщение об ошибке должно совпадать"
+        );
+    }
+
     private HttpResponse<String> sendDeleteRequest(
             String path
     ) throws Exception {
