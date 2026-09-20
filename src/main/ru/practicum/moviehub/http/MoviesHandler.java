@@ -103,14 +103,38 @@ public class MoviesHandler extends BaseHttpHandler {
             return;
         }
 
-        List<Movie> movies = store.getAllMovies();
+        String query = ex.getRequestURI().getQuery();
 
-        String responseJson = gson.toJson(movies);
+        if (query != null) {
+            handleGetMoviesByYear(ex, query);
+            return;
+        }
+
+        List<Movie> movies = store.getAllMovies();
 
         sendJson(
                 ex,
                 200,
-                responseJson
+                gson.toJson(movies)
+        );
+    }
+
+    private void handleGetMoviesByYear(
+            HttpExchange ex,
+            String query
+    ) throws IOException {
+        String yearPart =
+                query.substring("year=".length());
+
+        int year = Integer.parseInt(yearPart);
+
+        List<Movie> movies =
+                store.getMoviesByYear(year);
+
+        sendJson(
+                ex,
+                200,
+                gson.toJson(movies)
         );
     }
 

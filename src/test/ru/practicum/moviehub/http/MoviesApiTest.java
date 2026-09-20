@@ -400,6 +400,63 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void getMoviesByYear_whenMoviesExist_returnsMatchingMovies() throws Exception {
+        String matrixJson = """
+        {
+          "title": "Матрица",
+          "year": 1999
+        }
+        """;
+
+        String inceptionJson = """
+        {
+          "title": "Начало",
+          "year": 2010
+        }
+        """;
+
+        sendPostRequest(matrixJson);
+        sendPostRequest(inceptionJson);
+
+        HttpResponse<String> response =
+                sendGetRequest("/movies?year=1999");
+
+        assertEquals(
+                200,
+                response.statusCode(),
+                "GET /movies?year=YYYY должен вернуть 200"
+        );
+
+        assertJsonContentType(response);
+
+        JsonArray movies = JsonParser
+                .parseString(response.body())
+                .getAsJsonArray();
+
+        assertEquals(
+                1,
+                movies.size(),
+                "Должен вернуться только один фильм указанного года"
+        );
+
+        JsonObject movieJson = movies
+                .get(0)
+                .getAsJsonObject();
+
+        assertEquals(
+                "Матрица",
+                movieJson.get("title").getAsString(),
+                "Должен вернуться фильм указанного года"
+        );
+
+        assertEquals(
+                1999,
+                movieJson.get("year").getAsInt(),
+                "Год фильма должен совпадать с параметром запроса"
+        );
+    }
+
     private HttpResponse<String> sendDeleteRequest(
             String path
     ) throws Exception {
