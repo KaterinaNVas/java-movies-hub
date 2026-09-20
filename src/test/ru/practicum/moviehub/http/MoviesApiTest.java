@@ -342,6 +342,35 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void deleteMovie_whenMovieNotFound_returnsNotFound() throws Exception {
+        HttpResponse<String> response =
+                sendDeleteRequest("/movies/999");
+
+        assertEquals(
+                404,
+                response.statusCode(),
+                "DELETE /movies/{id} для несуществующего фильма должен вернуть 404"
+        );
+
+        assertJsonContentType(response);
+
+        JsonObject responseJson = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
+
+        assertTrue(
+                responseJson.has("error"),
+                "Ответ должен содержать поле error"
+        );
+
+        assertEquals(
+                "Фильм не найден",
+                responseJson.get("error").getAsString(),
+                "Сообщение об ошибке должно совпадать"
+        );
+    }
+
     private HttpResponse<String> sendDeleteRequest(
             String path
     ) throws Exception {
@@ -358,6 +387,8 @@ public class MoviesApiTest {
                 )
         );
     }
+
+
     private HttpResponse<String> sendPostRequest(String requestBody) throws Exception {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE + "/movies")).timeout(Duration.ofSeconds(2)).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8)).build();
 

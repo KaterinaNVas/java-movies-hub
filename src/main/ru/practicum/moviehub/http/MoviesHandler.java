@@ -65,7 +65,19 @@ public class MoviesHandler extends BaseHttpHandler {
 
         int id = Integer.parseInt(idPart);
 
-        store.deleteMovie(id);
+        boolean deleted = store.deleteMovie(id);
+
+        if (!deleted) {
+            ErrorResponse errorResponse =
+                    new ErrorResponse("Фильм не найден");
+
+            sendJson(
+                    ex,
+                    404,
+                    gson.toJson(errorResponse)
+            );
+            return;
+        }
 
         sendNoContent(ex);
     }
