@@ -56,12 +56,7 @@ public class MoviesApiTest {
 
     @Test
     void createMovie_whenDataValid_returnsCreatedMovie() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": 1999
-                }
-                """;
+        String requestBody = createMovieJson("Матрица", 1999);
 
         HttpResponse<String> resp = sendPostRequest(requestBody);
 
@@ -70,12 +65,7 @@ public class MoviesApiTest {
 
     @Test
     void createMovie_whenTitleEmpty_returnsValidationError() throws Exception {
-        String requestBody = """
-                {
-                  "title": "",
-                  "year": 1999
-                }
-                """;
+        String requestBody = createMovieJson("", 1999);
 
         HttpResponse<String> resp = sendPostRequest(requestBody);
 
@@ -86,12 +76,7 @@ public class MoviesApiTest {
     void createMovie_whenTitleTooLong_returnsValidationError() throws Exception {
         String tooLongTitle = "t".repeat(101);
 
-        String requestBody = """
-                {
-                  "title": "%s",
-                  "year": 1999
-                }
-                """.formatted(tooLongTitle);
+        String requestBody = createMovieJson(tooLongTitle, 1999);
 
         HttpResponse<String> resp = sendPostRequest(requestBody);
 
@@ -100,12 +85,7 @@ public class MoviesApiTest {
 
     @Test
     void createMovie_whenYearTooSmall_returnsValidationError() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": 1887
-                }
-                """;
+        String requestBody = createMovieJson("Матрица", 1887);
 
         HttpResponse<String> resp = sendPostRequest(requestBody);
 
@@ -116,12 +96,7 @@ public class MoviesApiTest {
     void createMovie_whenYearTooLarge_returnsValidationError() throws Exception {
         int year = LocalDate.now().getYear() + 2;
 
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": %d
-                }
-                """.formatted(year);
+        String requestBody = createMovieJson("Матрица", year);
 
         HttpResponse<String> resp = sendPostRequest(requestBody);
 
@@ -131,12 +106,7 @@ public class MoviesApiTest {
 
     @Test
     void createMovie_whenContentTypeInvalid_returnsUnsupportedMediaType() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": 1995
-                }
-                """;
+        String requestBody = createMovieJson("Матрица", 1995);
 
         HttpResponse<String> resp = sendPostRequest(requestBody, "text/plain");
 
@@ -153,12 +123,7 @@ public class MoviesApiTest {
 
     @Test
     void createMovie_whenJsonInvalid_returnsBadRequest() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year":
-                }
-                """;
+        String requestBody = "{\"title\":\"Матрица\",\"year\":}";
 
         HttpResponse<String> resp = sendPostRequest(requestBody);
 
@@ -175,12 +140,7 @@ public class MoviesApiTest {
 
     @Test
     void getMovieById_whenMovieExists_returnsMovie() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": 1999
-                }
-                """;
+        String requestBody = createMovieJson("Матрица", 1999);
 
         HttpResponse<String> createResponse = sendPostRequest(requestBody);
 
@@ -239,12 +199,7 @@ public class MoviesApiTest {
 
     @Test
     void getMovies_whenMoviesExist_returnsMovies() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": 1999
-                }
-                """;
+        String requestBody = createMovieJson("Матрица", 1999);
 
         HttpResponse<String> createResponse = sendPostRequest(requestBody);
 
@@ -271,12 +226,7 @@ public class MoviesApiTest {
 
     @Test
     void deleteMovie_whenMovieExists_returnsNoContent() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": 1999
-                }
-                """;
+        String requestBody = createMovieJson("Матрица", 1999);
 
         HttpResponse<String> createResponse = sendPostRequest(requestBody);
 
@@ -325,19 +275,8 @@ public class MoviesApiTest {
 
     @Test
     void getMoviesByYear_whenMoviesExist_returnsMatchingMovies() throws Exception {
-        String matrixJson = """
-                {
-                  "title": "Матрица",
-                  "year": 1999
-                }
-                """;
-
-        String inceptionJson = """
-                {
-                  "title": "Начало",
-                  "year": 2010
-                }
-                """;
+        String matrixJson = createMovieJson("Матрица", 1999);
+        String inceptionJson = createMovieJson("Начало", 2010);
 
         sendPostRequest(matrixJson);
         sendPostRequest(inceptionJson);
@@ -361,12 +300,7 @@ public class MoviesApiTest {
 
     @Test
     void getMoviesByYear_whenNoMoviesFound_returnsEmptyArray() throws Exception {
-        String requestBody = """
-                {
-                  "title": "Матрица",
-                  "year": 1999
-                }
-                """;
+        String requestBody = createMovieJson("Матрица", 1999);
 
         sendPostRequest(requestBody);
 
@@ -510,5 +444,16 @@ public class MoviesApiTest {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE + path)).timeout(Duration.ofSeconds(2)).GET().build();
 
         return client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+    }
+
+    private String createMovieJson(
+            String title,
+            int year
+    ) {
+        return String.format(
+                "{\"title\":\"%s\",\"year\":%d}",
+                title,
+                year
+        );
     }
 }
