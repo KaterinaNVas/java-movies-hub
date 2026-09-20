@@ -548,6 +548,52 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void movies_whenMethodUnsupported_returnsMethodNotAllowed() throws Exception {
+        HttpResponse<String> response =
+                sendPutRequest("/movies");
+
+        assertEquals(
+                405,
+                response.statusCode(),
+                "Неподдерживаемый HTTP-метод должен вернуть 405"
+        );
+
+        assertJsonContentType(response);
+
+        JsonObject responseJson = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
+
+        assertTrue(
+                responseJson.has("error"),
+                "Ответ должен содержать поле error"
+        );
+
+        assertEquals(
+                "Метод не поддерживается",
+                responseJson.get("error").getAsString(),
+                "Сообщение об ошибке должно совпадать"
+        );
+    }
+
+    private HttpResponse<String> sendPutRequest(
+            String path
+    ) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE + path))
+                .timeout(Duration.ofSeconds(2))
+                .PUT(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        return client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString(
+                        StandardCharsets.UTF_8
+                )
+        );
+    }
+
     private HttpResponse<String> sendDeleteRequest(
             String path
     ) throws Exception {
