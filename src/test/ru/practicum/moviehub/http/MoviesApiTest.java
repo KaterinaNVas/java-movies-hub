@@ -457,6 +457,39 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void getMoviesByYear_whenNoMoviesFound_returnsEmptyArray() throws Exception {
+        String requestBody = """
+        {
+          "title": "Матрица",
+          "year": 1999
+        }
+        """;
+
+        sendPostRequest(requestBody);
+
+        HttpResponse<String> response =
+                sendGetRequest("/movies?year=2010");
+
+        assertEquals(
+                200,
+                response.statusCode(),
+                "GET /movies?year=YYYY должен вернуть 200"
+        );
+
+        assertJsonContentType(response);
+
+        JsonArray movies = JsonParser
+                .parseString(response.body())
+                .getAsJsonArray();
+
+        assertEquals(
+                0,
+                movies.size(),
+                "Если фильмов указанного года нет, должен вернуться пустой массив"
+        );
+    }
+
     private HttpResponse<String> sendDeleteRequest(
             String path
     ) throws Exception {
