@@ -25,6 +25,7 @@ public class MoviesStore {
 
     public Movie addMovie(Movie movie) {
         int id = currentId++;
+        movie.setId(id);
         movies.put(id, movie);
         return movie;
     }
