@@ -519,6 +519,35 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void getMovies_whenQueryParameterInvalid_returnsBadRequest() throws Exception {
+        HttpResponse<String> response =
+                sendGetRequest("/movies?foo=1999");
+
+        assertEquals(
+                400,
+                response.statusCode(),
+                "GET /movies с неподдерживаемым параметром должен вернуть 400"
+        );
+
+        assertJsonContentType(response);
+
+        JsonObject responseJson = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
+
+        assertTrue(
+                responseJson.has("error"),
+                "Ответ должен содержать поле error"
+        );
+
+        assertEquals(
+                "Некорректный параметр запроса — 'year'",
+                responseJson.get("error").getAsString(),
+                "Сообщение должно указывать на корректный параметр year"
+        );
+    }
+
     private HttpResponse<String> sendDeleteRequest(
             String path
     ) throws Exception {

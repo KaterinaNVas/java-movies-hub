@@ -123,6 +123,11 @@ public class MoviesHandler extends BaseHttpHandler {
             HttpExchange ex,
             String query
     ) throws IOException {
+        if (!query.startsWith("year=")) {
+            sendInvalidYearQueryResponse(ex);
+            return;
+        }
+
         String yearPart =
                 query.substring("year=".length());
 
@@ -131,15 +136,7 @@ public class MoviesHandler extends BaseHttpHandler {
         try {
             year = Integer.parseInt(yearPart);
         } catch (NumberFormatException e) {
-            ErrorResponse errorResponse = new ErrorResponse(
-                    "Некорректный параметр запроса — 'year'"
-            );
-
-            sendJson(
-                    ex,
-                    400,
-                    gson.toJson(errorResponse)
-            );
+            sendInvalidYearQueryResponse(ex);
             return;
         }
 
@@ -260,6 +257,19 @@ public class MoviesHandler extends BaseHttpHandler {
         );
     }
 
+    private void sendInvalidYearQueryResponse(
+            HttpExchange ex
+    ) throws IOException {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Некорректный параметр запроса — 'year'"
+        );
+
+        sendJson(
+                ex,
+                400,
+                gson.toJson(errorResponse)
+        );
+    }
     private boolean isJsonContentType(String contentType) {
         if (contentType == null) {
             return false;
