@@ -371,6 +371,35 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void deleteMovie_whenIdNotNumber_returnsBadRequest() throws Exception {
+        HttpResponse<String> response =
+                sendDeleteRequest("/movies/abc");
+
+        assertEquals(
+                400,
+                response.statusCode(),
+                "DELETE /movies/{id} с нечисловым ID должен вернуть 400"
+        );
+
+        assertJsonContentType(response);
+
+        JsonObject responseJson = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
+
+        assertTrue(
+                responseJson.has("error"),
+                "Ответ должен содержать поле error"
+        );
+
+        assertEquals(
+                "Некорректный ID",
+                responseJson.get("error").getAsString(),
+                "Сообщение об ошибке должно совпадать"
+        );
+    }
+
     private HttpResponse<String> sendDeleteRequest(
             String path
     ) throws Exception {
