@@ -38,6 +38,11 @@ public class MoviesHandler extends BaseHttpHandler {
             return;
         }
 
+        if (method.equalsIgnoreCase("DELETE")) {
+            handleDeleteMovie(ex);
+            return;
+        }
+
         ErrorResponse errorResponse = new ErrorResponse(
                 "Метод не поддерживается"
         );
@@ -49,6 +54,21 @@ public class MoviesHandler extends BaseHttpHandler {
         );
     }
 
+
+    private void handleDeleteMovie(
+            HttpExchange ex
+    ) throws IOException {
+        String path = ex.getRequestURI().getPath();
+
+        String idPart =
+                path.substring("/movies/".length());
+
+        int id = Integer.parseInt(idPart);
+
+        store.deleteMovie(id);
+
+        sendNoContent(ex);
+    }
     private void handleGetMovies(HttpExchange ex) throws IOException {
         String path = ex.getRequestURI().getPath();
 

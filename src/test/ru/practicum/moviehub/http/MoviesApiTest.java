@@ -237,6 +237,127 @@ public class MoviesApiTest {
         assertEquals("Некорректный ID", responseJson.get("error").getAsString(), "Сообщение об ошибке должно совпадать");
     }
 
+    @Test
+    void getMovies_whenMoviesExist_returnsMovies() throws Exception {
+        String requestBody = """
+        {
+          "title": "Матрица",
+          "year": 1999
+        }
+        """;
+
+        HttpResponse<String> createResponse =
+                sendPostRequest(requestBody);
+
+        int movieId = assertCreatedMovie(
+                createResponse,
+                "Матрица",
+                1999
+        );
+
+        HttpResponse<String> getResponse =
+                sendGetRequest("/movies");
+
+        assertEquals(
+                200,
+                getResponse.statusCode(),
+                "GET /movies должен вернуть 200"
+        );
+
+        assertJsonContentType(getResponse);
+
+        JsonArray movies = JsonParser
+                .parseString(getResponse.body())
+                .getAsJsonArray();
+
+        assertEquals(
+                1,
+                movies.size(),
+                "В списке должен находиться один фильм"
+        );
+
+        JsonObject movieJson = movies
+                .get(0)
+                .getAsJsonObject();
+
+        assertEquals(
+                movieId,
+                movieJson.get("id").getAsInt(),
+                "ID фильма должен совпадать"
+        );
+
+        assertEquals(
+                "Матрица",
+                movieJson.get("title").getAsString(),
+                "Название фильма должно совпадать"
+        );
+
+        assertEquals(
+                1999,
+                movieJson.get("year").getAsInt(),
+                "Год фильма должен совпадать"
+        );
+    }
+
+    @Test
+    void deleteMovie_whenMovieExists_returnsNoContent() throws Exception {
+        String requestBody = """
+        {
+          "title": "Матрица",
+          "year": 1999
+        }
+        """;
+
+        HttpResponse<String> createResponse =
+                sendPostRequest(requestBody);
+
+        int movieId = assertCreatedMovie(
+                createResponse,
+                "Матрица",
+                1999
+        );
+
+        HttpResponse<String> deleteResponse =
+                sendDeleteRequest("/movies/" + movieId);
+
+        assertEquals(
+                204,
+                deleteResponse.statusCode(),
+                "DELETE /movies/{id} существующего фильма должен вернуть 204"
+        );
+
+        assertEquals(
+                "",
+                deleteResponse.body(),
+                "Ответ 204 No Content не должен содержать тело"
+        );
+
+        HttpResponse<String> getResponse =
+                sendGetRequest("/movies/" + movieId);
+
+        assertEquals(
+                404,
+                getResponse.statusCode(),
+                "После удаления фильм не должен находиться в хранилище"
+        );
+    }
+
+    private HttpResponse<String> sendDeleteRequest(
+            String path
+    ) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE + path))
+                .timeout(Duration.ofSeconds(2))
+                .DELETE()
+                .build();
+
+        return client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString(
+                        StandardCharsets.UTF_8
+                )
+        );
+    }
     private HttpResponse<String> sendPostRequest(String requestBody) throws Exception {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE + "/movies")).timeout(Duration.ofSeconds(2)).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8)).build();
 
