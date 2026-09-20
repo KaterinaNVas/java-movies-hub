@@ -307,14 +307,18 @@ public class MoviesHandler extends BaseHttpHandler {
         int maxYear = LocalDate.now().getYear() + 1;
 
         if (year == null) {
-            validationErrors.add(
-                    "Год должен быть указан"
-            );
-        } else if (year < 1888) {
+            validationErrors.add("Год должен быть указан");
+            return;
+        }
+
+        if (year < 1888) {
             validationErrors.add(
                     "Год не должен быть ранее 1888"
             );
-        } else if (year > maxYear) {
+            return;
+        }
+
+        if (year > maxYear) {
             validationErrors.add(
                     "Год не должен быть позднее текущего более чем на один год"
             );
@@ -333,5 +337,13 @@ public class MoviesHandler extends BaseHttpHandler {
                 400,
                 gson.toJson(errorResponse)
         );
+    }
+
+    public MoviesStore getStore() {
+        return store;
+    }
+
+    public Gson getGson() {
+        return gson;
     }
 }

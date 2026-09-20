@@ -34,4 +34,9 @@ public class MoviesServer {
     public MoviesStore getStore() {
         return store;
     }
+
+    public HttpServer getServer() {
+        return server;
+    }
+
 }

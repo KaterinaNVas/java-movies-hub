@@ -2,10 +2,10 @@ package ru.practicum.moviehub.model;
 
 public class Movie {
     private String title;
-    private int year;
+    private Integer year;
     private int id;
 
-    public Movie(String title, int year) {
+    public Movie(String title, Integer year) {
         this.title = title;
         this.year = year;
     }
@@ -13,7 +13,7 @@ public class Movie {
         return title;
     }
 
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 
@@ -29,7 +29,7 @@ public class Movie {
         this.title = title;
     }
 
-    public void setYear(int year) {
+    public void setYear(Integer year) {
         this.year = year;
     }
 }

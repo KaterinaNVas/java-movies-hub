@@ -27,8 +27,6 @@ abstract class BaseHttpHandler implements HttpHandler {
         ex.getResponseHeaders().set("Content-Type", CT_JSON);
         ex.sendResponseHeaders(204, -1);
 
-        try (OutputStream os = ex.getResponseBody()) {
-            os.close();
-        }
+        try (OutputStream os = ex.getResponseBody()) {}
     }
 }
