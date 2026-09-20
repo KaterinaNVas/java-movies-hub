@@ -302,6 +302,35 @@ public class MoviesApiTest {
         );
     }
 
+    @Test
+    void getMovieById_whenMovieNotFound_returnsNotFound() throws Exception {
+        HttpResponse<String> response =
+                sendGetRequest("/movies/999");
+
+        assertEquals(
+                404,
+                response.statusCode(),
+                "GET /movies/{id} для несуществующего фильма должен вернуть 404"
+        );
+
+        assertJsonContentType(response);
+
+        JsonObject responseJson = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
+
+        assertTrue(
+                responseJson.has("error"),
+                "Ответ должен содержать поле error"
+        );
+
+        assertEquals(
+                "Фильм не найден",
+                responseJson.get("error").getAsString(),
+                "Сообщение об ошибке должно совпадать"
+        );
+    }
+
         private HttpResponse<String> sendPostRequest(
             String requestBody
     ) throws Exception {

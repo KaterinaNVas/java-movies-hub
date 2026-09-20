@@ -73,8 +73,36 @@ public class MoviesHandler extends BaseHttpHandler {
             String path
     ) throws IOException {
         String idPart = path.substring("/movies/".length());
-        int id = Integer.parseInt(idPart);
+
+        int id;
+
+        try {
+            id = Integer.parseInt(idPart);
+        } catch (NumberFormatException e) {
+            ErrorResponse errorResponse =
+                    new ErrorResponse("Некорректный ID");
+
+            sendJson(
+                    ex,
+                    400,
+                    gson.toJson(errorResponse)
+            );
+            return;
+        }
+
         Movie movie = store.getMovieById(id);
+
+        if (movie == null) {
+            ErrorResponse errorResponse =
+                    new ErrorResponse("Фильм не найден");
+
+            sendJson(
+                    ex,
+                    404,
+                    gson.toJson(errorResponse)
+            );
+            return;
+        }
 
         sendJson(
                 ex,
